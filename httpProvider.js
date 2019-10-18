@@ -16,27 +16,69 @@
 */
 /** @file httpprovider.js
  * @authors:
- *   Marek Kotewicz <marek@ethdev.com>
- *   Marian Oancea <marian@ethdev.com>
- *   Fabian Vogelsteller <fabian@ethdev.com>
+ *   Marek Kotewicz <marek@parity.io>
+ *   Marian Oancea
+ *   Fabian Vogelsteller <fabian@ethereum.org>
  * @date 2015
  */
 
 var errors = require('web3-core-helpers').errors;
-var XHR2 = require('xhr2'); // jshint ignore: line
-var url = require('url');
+var XHR2 = require('xhr2-cookies').XMLHttpRequest // jshint ignore: line
+var http = require('http');
+var https = require('https');
+var URL = require('url');
 
-var localURL = url.parse(location.href, true);
+var localURL = URL.parse(location.href, true);
 
 /**
  * HttpProvider should be used to send rpc calls over http
  */
-var HttpProvider = function HttpProvider(host, timeout) {
+var HttpProvider = function HttpProvider(host, options) {
+    
+    options = options || {};
+
+    var keepAlive =
+        (options.keepAlive === true || options.keepAlive !== false) ?
+            true :
+            false;
     this.host = host || 'http://localhost:8545';
-    this.timeout = timeout || 0;
+    if (this.host.substring(0,5) === "https") {
+        this.httpsAgent = new https.Agent({ keepAlive: keepAlive });
+    }else{
+        this.httpAgent = new http.Agent({ keepAlive: keepAlive });
+    }
+    this.timeout = options.timeout || 0;
+    this.headers = options.headers;
     this.connected = false;
 };
 
+HttpProvider.prototype._prepareRequest = function(){
+    
+    process.versions = {
+        node: "unkown",
+        v8:"unkown"
+    }
+    
+    var request = new XHR2();
+    
+    request.nodejsSet({
+        httpsAgent:this.httpsAgent,
+        httpAgent:this.httpAgent
+    });
+
+    request.open('POST', this.host, true);
+    request.setRequestHeader('Content-Type','application/json');
+    request.timeout = this.timeout && this.timeout !== 1 ? this.timeout : 0;
+    request.withCredentials = true;
+
+    if(this.headers) {
+        this.headers.forEach(function(header) {
+            request.setRequestHeader(header.name, header.value);
+        });
+    }
+
+    return request;
+};
 
 /**
  * Should be used to make async request
@@ -46,19 +88,16 @@ var HttpProvider = function HttpProvider(host, timeout) {
  * @param {Function} callback triggered on end with (err, result)
  */
 HttpProvider.prototype.send = function (payload, callback) {
-
+    
     if ( localURL.query._lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) === "function" ) {
         var success = function(r) {callback(null, r)}
         var fail = function(e) {callback(e, null)}
-        plus.bridge.exec("LMETH", "eth_sendTransaction", [plus.bridge.callbackId(success, fail)], options )
+        plus.bridge.exec("LMETH", "eth_sendTransaction", [plus.bridge.callbackId(success, fail)], payload )
         return;
     }
-
+    
     var _this = this;
-    var request = new XHR2();
-
-    request.open('POST', this.host, true);
-    request.setRequestHeader('Content-Type','application/json');
+    var request = this._prepareRequest();
 
     request.onreadystatechange = function() {
         if (request.readyState === 4 && request.timeout !== 1) {
@@ -88,6 +127,11 @@ HttpProvider.prototype.send = function (payload, callback) {
         callback(errors.InvalidConnection(this.host));
     }
 };
+
+HttpProvider.prototype.disconnect = function () {
+    //NO OP
+};
+
 
 HttpProvider.prototype.enable = function() {
     return new Promise(function(resolve, reject) {

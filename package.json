@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/lmsdk/lmsdk-eth-providers#readme",
   "dependencies": {
-      "web3-core-helpers": "^1.0.0",
-      "xhr2": "0.1.4"
+    "web3-core-helpers": "1.2.0",
+    "xhr2-cookies": "1.1.0"
   }
 }
