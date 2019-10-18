@@ -1,0 +1,26 @@
+{
+  "name": "lmsdk-eth-providers",
+  "version": "1.0.0-dev1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lmsdk/lmsdk-eth-providers.git"
+  },
+  "keywords": [
+    "lmsdk-eth-providers"
+  ],
+  "author": "oblivioned",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lmsdk/lmsdk-eth-providers/issues"
+  },
+  "homepage": "https://github.com/lmsdk/lmsdk-eth-providers#readme",
+  "dependencies": {
+      "web3-core-helpers": "^1.0.0",
+      "xhr2": "0.1.4"
+  }
+}
