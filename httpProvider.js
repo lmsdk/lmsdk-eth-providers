@@ -91,14 +91,14 @@ HttpProvider.prototype.send = function (payload, callback) {
 
     if ( localURL.query._lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) === "function" ) {
         var success = function(r) {
-            callback({
+            callback(null, {
                 id: payload.id,
                 jsonrpc: payload.jsonrpc,
                 result:r
             })
         }
         var fail = function(e) {
-            callback({
+            callback(e, {
                 id: payload.id,
                 jsonrpc: payload.jsonrpc,
                 error:e
