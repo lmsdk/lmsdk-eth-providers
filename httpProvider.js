@@ -89,33 +89,14 @@ HttpProvider.prototype._prepareRequest = function(){
  */
 HttpProvider.prototype.send = function (payload, callback) {
 
-    if ( localURL.query._lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) === "function" ) {
-        var success = function(r) {
-            callback(null, {
-                id: payload.id,
-                jsonrpc: payload.jsonrpc,
-                result:r
-            })
-        }
-        var fail = function(e) {
-            callback(e, {
-                id: payload.id,
-                jsonrpc: payload.jsonrpc,
-                error:e
-            })
-        }
-        plus.bridge.exec("LMETH", "eth_sendTransaction", [plus.bridge.callbackId(success, fail)], payload )
-        return;
-    }
-
     var _this = this;
     var request = this._prepareRequest();
 
     request.onreadystatechange = function() {
+
         if (request.readyState === 4 && request.timeout !== 1) {
             var result = request.responseText;
             var error = null;
-
             try {
                 result = JSON.parse(result);
             } catch(e) {
@@ -132,11 +113,31 @@ HttpProvider.prototype.send = function (payload, callback) {
         callback(errors.ConnectionTimeout(this.timeout));
     };
 
-    try {
-        request.send(JSON.stringify(payload));
-    } catch(error) {
-        this.connected = false;
-        callback(errors.InvalidConnection(this.host));
+    if ( localURL.query._lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) === "function" ) {
+        var success = function(rawTx) {
+            payload.method = "eth_sendRawTransaction";
+            payload.params = [rawTx];
+            try {
+                request.send(JSON.stringify(payload));
+            } catch(error) {
+                this.connected = false;
+                callback(errors.InvalidConnection(this.host));
+            }
+        }
+        var fail = function(e) {
+            callback(e, r)
+        }
+        plus.bridge.exec("LMETH", "eth_sendTransaction", [plus.bridge.callbackId(success, fail)], payload )
+        return;
+
+    } else {
+
+        try {
+            request.send(JSON.stringify(payload));
+        } catch(error) {
+            this.connected = false;
+            callback(errors.InvalidConnection(this.host));
+        }
     }
 };
 
