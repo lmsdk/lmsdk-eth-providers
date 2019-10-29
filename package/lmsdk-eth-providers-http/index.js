@@ -26,10 +26,8 @@ var errors = require('web3-core-helpers').errors;
 var XHR2 = require('xhr2-cookies').XMLHttpRequest // jshint ignore: line
 var http = require('http');
 var https = require('https');
-var URL = require('url');
 
-var localURL = URL.parse(location.href, true);
-
+import LMPUtils from '../../../lmsdk-core/package/lmsdk-core-utils'
 /**
  * HttpProvider should be used to send rpc calls over http
  */
@@ -113,7 +111,7 @@ HttpProvider.prototype.send = function (payload, callback) {
         callback(errors.ConnectionTimeout(this.timeout));
     };
 
-    if ( localURL.query._lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) === "function" ) {
+    if ( LMPUtils.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) === "function" ) {
         var success = function(rawTx) {
             payload.method = "eth_sendRawTransaction";
             payload.params = [rawTx];
@@ -148,7 +146,7 @@ HttpProvider.prototype.disconnect = function () {
 
 HttpProvider.prototype.enable = function() {
     return new Promise(function(resolve, reject) {
-        if ( localURL.query._lmt === 'ethereum' ) {
+        if ( lLMPUtils.lmt === 'ethereum' ) {
             plus.bridge.exec("LMETH", "enable", [plus.bridge.callbackId(resolve, reject)])
         } else {
             reject("not in lmwallet")
