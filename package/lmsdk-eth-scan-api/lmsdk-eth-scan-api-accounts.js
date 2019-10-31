@@ -27,7 +27,7 @@ LMPEthscanAPIAccounts.prototype.transactionsListRequest = function(options) {
 		page: options.page,
 		offset: options.offset,
 		endblock: 'latest',
-		sort: 'desc',
+		sort: options.sort,
 		apikey: 'YourApiKeyToken',
 	});
 }

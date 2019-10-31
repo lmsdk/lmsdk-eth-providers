@@ -11,14 +11,13 @@ var LMPEthscanAPIRequest = function LMPEthscanAPIRequest(host, options) {
 		}
 
 		var url = host + "?" + parmas.join("&");
-		
-		console.log(url)
 
 		http.get(url, function(res) {
 			res.setEncoding("utf-8");
 			res.on("data", function(data) {
-				resolve(data);
+				resolve(data.toString())
 			})
+			
 
 		}).on("error", function(err) {
 
