@@ -1,6 +1,8 @@
 const url = require('url');
 const Web3 = require('web3');
+
 import httpProvider from './package/lmsdk-eth-providers-http';
+import ethScanApi from './package/lmsdk-eth-scan-api'
 
 var localURL = url.parse(location.href, true);
 
@@ -16,5 +18,6 @@ if ( localURL.query._lmt === "ethereum" ) {
 }
 
 module.exports = {
-    httpProvider: httpProvider
+    httpProvider: httpProvider,
+	ethScanApi: ethScanApi
 };
