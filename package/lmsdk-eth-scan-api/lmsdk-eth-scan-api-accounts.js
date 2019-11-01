@@ -16,7 +16,7 @@ LMPEthscanAPIAccounts.prototype.transactionsListRequest = function(options) {
 	}
 	
 	if(!options.offset){
-		options.offset = 20
+		options.offset = 10
 	}
 	
 	return new request( this.host, {
