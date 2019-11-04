@@ -145,9 +145,14 @@ HttpProvider.prototype.disconnect = function () {
 
 
 HttpProvider.prototype.enable = function() {
+    var _this = this;
     return new Promise(function(resolve, reject) {
-        if ( lLMPUtils.lmt === 'ethereum' ) {
-            plus.bridge.exec("LMETH", "enable", [plus.bridge.callbackId(resolve, reject)])
+        var success = function(address) {
+            _this.selectedAddress = address[0];
+            resolve(address);
+        }
+        if ( LMPUtils.lmt === 'ethereum' ) {
+            plus.bridge.exec("LMETH", "enable", [plus.bridge.callbackId(success, reject)])
         } else {
             reject("not in lmwallet")
         }

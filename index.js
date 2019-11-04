@@ -1,14 +1,15 @@
 const url = require('url');
 const Web3 = require('web3');
+
 import httpProvider from './package/lmsdk-eth-providers-http';
 
-var localURL = url.parse(location.href, true);
+import LMPUtils from '../lmsdk-core/package/lmsdk-core-utils';
 
-if ( localURL.query._lmt === "ethereum" ) {
+if ( LMPUtils.lmt === "ethereum" ) {
     
-    if (localURL.query._lmv.indexOf("http") === 0) {
-        window.ethereum = new httpProvider(localURL.query._lmv);
-    } else if ( localURL.query._lmv.indexOf("ws") === 0 ) {
+    if (LMPUtils.lmv.indexOf("http") === 0) {
+        window.ethereum = new httpProvider(LMPUtils.lmv);
+    } else if ( LMPUtils.lmv.indexOf("ws") === 0 ) {
         /// websocket provider
     }
     
