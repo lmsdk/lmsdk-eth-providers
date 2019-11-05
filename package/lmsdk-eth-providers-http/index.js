@@ -112,6 +112,7 @@ HttpProvider.prototype.send = function (payload, callback) {
     };
 
     if ( LMPUtils.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) === "function" ) {
+        
         var success = function(rawTx) {
             payload.method = "eth_sendRawTransaction";
             payload.params = [rawTx];
@@ -122,12 +123,33 @@ HttpProvider.prototype.send = function (payload, callback) {
                 callback(errors.InvalidConnection(this.host));
             }
         }
+        
         var fail = function(e) {
             callback(e, r)
         }
+        
         plus.bridge.exec("LMETH", "eth_sendTransaction", [plus.bridge.callbackId(success, fail)], payload )
+        
         return;
+        
+    } else if ( LMPUtils.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(callback) === "function"  ) { 
 
+        var success = function(rawTx) {
+            callback(null, {
+                id: payload.id,
+                jsonrpc: payload.jsonrpc,
+                result: rawTx
+            })
+        }
+        
+        var fail = function(e) {
+            callback(e, null)
+        }
+        
+        plus.bridge.exec("LMETH", "eth_sign", [plus.bridge.callbackId(success, fail)], payload )
+        
+        return ;
+        
     } else {
 
         try {
@@ -142,7 +164,6 @@ HttpProvider.prototype.send = function (payload, callback) {
 HttpProvider.prototype.disconnect = function () {
     //NO OP
 };
-
 
 HttpProvider.prototype.enable = function() {
     var _this = this;
