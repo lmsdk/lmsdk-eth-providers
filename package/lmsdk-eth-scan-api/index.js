@@ -1,5 +1,4 @@
-
-import accounts from "./lmsdk-eth-scan-api-accounts.js";
+let accounts = require("./lmsdk-eth-scan-api-accounts.js")
 
 var LMPEthscanAPI = function LMPEthscanAPI() {
 	

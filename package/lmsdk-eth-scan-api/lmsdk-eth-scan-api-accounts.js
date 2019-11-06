@@ -1,4 +1,4 @@
-import request from './lmsdk-eth-scan-request.js'
+let request = require('./lmsdk-eth-scan-request.js');
 
 var LMPEthscanAPIAccounts = function LMPEthscanAPIAccounts( host ) {
 	this.host = host

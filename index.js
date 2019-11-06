@@ -1,20 +1,19 @@
-const url = require('url');
-const Web3 = require('web3');
+let Web3 = require('web3');    
+let httpProvider = require('./package/lmsdk-eth-providers-http');
+let ethScanApi = require('./package/lmsdk-eth-scan-api');
 
-import httpProvider from './package/lmsdk-eth-providers-http';
-import ethScanApi from './package/lmsdk-eth-scan-api'
-import LMPUtils from '../lmsdk-core/package/lmsdk-core-utils';
-
-if ( LMPUtils.lmt === "ethereum" ) {
+if ( window.lmdapp && window.lmdapp.lmt === "ethereum" ) {
     
-    if ( LMPUtils.lmv.indexOf("http") === 0 ) {
-        window.ethereum = new httpProvider(LMPUtils.lmv);
-    } else if ( LMPUtils.lmv.indexOf("ws") === 0 ) {
+    if ( window.lmdapp.lmv.indexOf("http") === 0 ) {
+        window.ethereum = new httpProvider(window.lmdapp.lmv);
+    } else if ( window.lmdapp.lmv.indexOf("ws") === 0 ) {
         /// websocket provider
     }
     
     window.web3 = new Web3(window.ethereum);
 }
+
+window.Web3 = Web3;
 
 module.exports = {
     httpProvider: httpProvider,
