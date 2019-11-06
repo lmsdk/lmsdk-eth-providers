@@ -60,39 +60,43 @@ var HttpProvider = function HttpProvider(host, options) {
 
     var keepAlive =
         (options.keepAlive === true || options.keepAlive !== false) ?
-            true :
-            false;
+        true :
+        false;
     this.host = host || 'http://localhost:8545';
-    if (this.host.substring(0,5) === "https") {
-        this.httpsAgent = new https.Agent({ keepAlive: keepAlive });
-    }else{
-        this.httpAgent = new http.Agent({ keepAlive: keepAlive });
+    if (this.host.substring(0, 5) === "https") {
+        this.httpsAgent = new https.Agent({
+            keepAlive: keepAlive
+        });
+    } else {
+        this.httpAgent = new http.Agent({
+            keepAlive: keepAlive
+        });
     }
     this.timeout = options.timeout || 0;
     this.headers = options.headers;
     this.connected = false;
 };
 
-HttpProvider.prototype._prepareRequest = function(){
+HttpProvider.prototype._prepareRequest = function() {
 
     process.versions = {
         node: "unkown",
-        v8:"unkown"
+        v8: "unkown"
     }
 
     var request = new XHR2();
 
     request.nodejsSet({
-        httpsAgent:this.httpsAgent,
-        httpAgent:this.httpAgent
+        httpsAgent: this.httpsAgent,
+        httpAgent: this.httpAgent
     });
 
     request.open('POST', this.host, true);
-    request.setRequestHeader('Content-Type','application/json');
+    request.setRequestHeader('Content-Type', 'application/json');
     request.timeout = this.timeout && this.timeout !== 1 ? this.timeout : 0;
     request.withCredentials = true;
 
-    if(this.headers) {
+    if (this.headers) {
         this.headers.forEach(function(header) {
             request.setRequestHeader(header.name, header.value);
         });
@@ -108,7 +112,7 @@ HttpProvider.prototype._prepareRequest = function(){
  * @param {Object} payload
  * @param {Function} callback triggered on end with (err, result)
  */
-HttpProvider.prototype.send = function (payload, callback) {
+HttpProvider.prototype.send = function(payload, callback) {
 
     var _this = this;
     var request = this._prepareRequest();
@@ -120,7 +124,7 @@ HttpProvider.prototype.send = function (payload, callback) {
             var error = null;
             try {
                 result = JSON.parse(result);
-            } catch(e) {
+            } catch (e) {
                 error = errors.InvalidResponse(request.responseText);
             }
 
@@ -134,28 +138,29 @@ HttpProvider.prototype.send = function (payload, callback) {
         callback(errors.ConnectionTimeout(this.timeout));
     };
 
-    if ( window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) === "function" ) {
-        
+    if (window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) ===
+        "function") {
+
         var success = function(rawTx) {
             payload.method = "eth_sendRawTransaction";
             payload.params = [rawTx];
             try {
                 request.send(JSON.stringify(payload));
-            } catch(error) {
+            } catch (error) {
                 this.connected = false;
                 callback(errors.InvalidConnection(this.host));
             }
         }
-        
+
         var fail = function(e) {
             callback(e, r)
         }
-        
-        plus.bridge.exec("LMETH", "eth_sendTransaction", [plus.bridge.callbackId(success, fail)], payload )
-        
+
+        plus.bridge.exec("LMETH", "eth_sendTransaction", [plus.bridge.callbackId(success, fail)], payload)
+
         return;
-        
-    } else if ( window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(callback) === "function"  ) { 
+
+    } else if (window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(callback) === "function") {
 
         var success = function(rawTx) {
             callback(null, {
@@ -164,27 +169,27 @@ HttpProvider.prototype.send = function (payload, callback) {
                 result: rawTx
             })
         }
-        
+
         var fail = function(e) {
             callback(e, null)
         }
-        
-        plus.bridge.exec("LMETH", "eth_sign", [plus.bridge.callbackId(success, fail)], payload )
-        
-        return ;
-        
+
+        plus.bridge.exec("LMETH", "eth_sign", [plus.bridge.callbackId(success, fail)], payload)
+
+        return;
+
     } else {
 
         try {
             request.send(JSON.stringify(payload));
-        } catch(error) {
+        } catch (error) {
             this.connected = false;
             callback(errors.InvalidConnection(this.host));
         }
     }
 };
 
-HttpProvider.prototype.disconnect = function () {
+HttpProvider.prototype.disconnect = function() {
     //NO OP
 };
 
@@ -197,7 +202,7 @@ HttpProvider.prototype.enable = function() {
             window.web3.eth.accounts = address;
             resolve(address);
         }
-        if ( window.lmdapp.lmt === 'ethereum' ) {
+        if (window.lmdapp.lmt === 'ethereum') {
             plus.bridge.exec("LMETH", "enable", [plus.bridge.callbackId(success, reject)])
         } else {
             reject("not in lmwallet")
@@ -208,7 +213,7 @@ HttpProvider.prototype.isMetaMask = true;
 HttpProvider.prototype.isLimoWallet = true;
 HttpProvider.prototype.autoRefreshOnNetworkChange = true;
 HttpProvider.prototype._eventObservers = [];
-HttpProvider.prototype.on = function( eventName, action ) {
+HttpProvider.prototype.on = function(eventName, action) {
     this._eventObservers.push({
         name: eventName,
         fun: action,
@@ -216,21 +221,22 @@ HttpProvider.prototype.on = function( eventName, action ) {
 }
 /// accountsChanged, returns updated account array.
 /// networkChanged, returns network ID string.
-HttpProvider.prototype._emitEvent = function( eventName, ...objs ) {
-    for ( var observer in this._eventObservers ) {
-        if ( this._eventObservers.hasOwnProperty(observer) && observer.name === eventName ) {
-            observer.fun( objs )
+HttpProvider.prototype._emitEvent = function(eventName, ...objs) {
+    for (var observer in this._eventObservers) {
+        if (this._eventObservers.hasOwnProperty(observer) && observer.name === eventName) {
+            observer.fun(objs)
         }
     }
 }
 
-HttpProvider.prototype.on("networkChanged", function( netid ) {
-    if ( this.autoRefreshOnNetworkChange === true ) {
+HttpProvider.prototype.on("networkChanged", function(netid) {
+    if (this.autoRefreshOnNetworkChange === true) {
         window.location.reload()
     }
 })
 
 module.exports = HttpProvider;
+
 }).call(this,require('_process'))
 },{"_process":398,"http":437,"https":377,"web3-core-helpers":215,"xhr2-cookies":273}],3:[function(require,module,exports){
 let accounts = require("./lmsdk-eth-scan-api-accounts.js")
