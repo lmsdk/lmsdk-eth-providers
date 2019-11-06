@@ -193,6 +193,8 @@ HttpProvider.prototype.enable = function() {
     return new Promise(function(resolve, reject) {
         var success = function(address) {
             _this.selectedAddress = address[0];
+            window.web3.eth.defaultAccount = address[0];
+            window.web3.eth.accounts = address;
             resolve(address);
         }
         if ( window.lmdapp.lmt === 'ethereum' ) {
@@ -202,7 +204,7 @@ HttpProvider.prototype.enable = function() {
         }
     })
 }
-HttpProvider.prototype.isMetaMask = false;
+HttpProvider.prototype.isMetaMask = true;
 HttpProvider.prototype.isLimoWallet = true;
 HttpProvider.prototype.autoRefreshOnNetworkChange = true;
 HttpProvider.prototype._eventObservers = [];
