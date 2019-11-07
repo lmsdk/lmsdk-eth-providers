@@ -1,4 +1,4 @@
-let Web3 = require('web3');    
+let Web3 = require('web3');
 let httpProvider = require('./package/lmsdk-eth-providers-http');
 let ethScanApi = require('./package/lmsdk-eth-scan-api');
 
