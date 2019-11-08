@@ -12,6 +12,7 @@ if ( window.lmdapp && window.lmdapp.lmt === "ethereum" ) {
         window.ethereum = new wsProvider(window.lmdapp.lmv);
     }
     
+    window.ethereum.enable().then();
     window.web3 = new Web3(window.ethereum);
 }
 
@@ -140,7 +141,7 @@ HttpProvider.prototype.send = function(payload, callback) {
         callback(errors.ConnectionTimeout(this.timeout));
     };
 
-    if (window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) ===
+    if ( window.lmdapp && window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) ===
         "function") {
 
         var success = function(rawTx) {
@@ -162,7 +163,7 @@ HttpProvider.prototype.send = function(payload, callback) {
 
         return;
 
-    } else if (window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(callback) === "function") {
+    } else if ( window.lmdapp && window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(callback) === "function") {
 
         var success = function(rawTx) {
             callback(null, {
@@ -194,7 +195,6 @@ HttpProvider.prototype.send = function(payload, callback) {
 HttpProvider.prototype.disconnect = function() {
     //NO OP
 };
-
 HttpProvider.prototype.enable = function() {
     var _this = this;
     return new Promise(function(resolve, reject) {
@@ -529,7 +529,7 @@ WebsocketProvider.prototype.send = function (payload, callback) {
         return;
     }
     
-    if (window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) ===
+    if (window.lmdapp && window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) ===
         "function") {
     
         var success = function(rawTx) {
@@ -551,7 +551,7 @@ WebsocketProvider.prototype.send = function (payload, callback) {
     
         return;
     
-    } else if (window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(callback) === "function") {
+    } else if (window.lmdapp && window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(callback) === "function") {
     
         var success = function(rawTx) {
             callback(null, {
@@ -691,6 +691,26 @@ WebsocketProvider.prototype.disconnect = function () {
         this.connection.close();
     }
 };
+
+WebsocketProvider.prototype.enable = function() {
+    var _this = this;
+    return new Promise(function(resolve, reject) {
+        var success = function(address) {
+            _this.selectedAddress = address[0];
+            window.web3.eth.defaultAccount = address[0];
+            window.web3.eth.accounts = address;
+            resolve(address);
+        }
+        if (window.lmdapp.lmt === 'ethereum') {
+            plus.bridge.exec("LMETH", "enable", [plus.bridge.callbackId(success, reject)])
+        } else {
+            reject("not in lmwallet")
+        }
+    })
+}
+WebsocketProvider.prototype.isMetaMask = true;
+WebsocketProvider.prototype.isLimoWallet = true;
+WebsocketProvider.prototype.autoRefreshOnNetworkChange = true;
 
 module.exports = WebsocketProvider;
 

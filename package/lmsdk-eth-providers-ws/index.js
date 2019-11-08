@@ -285,7 +285,7 @@ WebsocketProvider.prototype.send = function (payload, callback) {
         return;
     }
     
-    if (window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) ===
+    if (window.lmdapp && window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) ===
         "function") {
     
         var success = function(rawTx) {
@@ -307,7 +307,7 @@ WebsocketProvider.prototype.send = function (payload, callback) {
     
         return;
     
-    } else if (window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(callback) === "function") {
+    } else if (window.lmdapp && window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(callback) === "function") {
     
         var success = function(rawTx) {
             callback(null, {
@@ -447,5 +447,25 @@ WebsocketProvider.prototype.disconnect = function () {
         this.connection.close();
     }
 };
+
+WebsocketProvider.prototype.enable = function() {
+    var _this = this;
+    return new Promise(function(resolve, reject) {
+        var success = function(address) {
+            _this.selectedAddress = address[0];
+            window.web3.eth.defaultAccount = address[0];
+            window.web3.eth.accounts = address;
+            resolve(address);
+        }
+        if (window.lmdapp.lmt === 'ethereum') {
+            plus.bridge.exec("LMETH", "enable", [plus.bridge.callbackId(success, reject)])
+        } else {
+            reject("not in lmwallet")
+        }
+    })
+}
+WebsocketProvider.prototype.isMetaMask = true;
+WebsocketProvider.prototype.isLimoWallet = true;
+WebsocketProvider.prototype.autoRefreshOnNetworkChange = true;
 
 module.exports = WebsocketProvider;

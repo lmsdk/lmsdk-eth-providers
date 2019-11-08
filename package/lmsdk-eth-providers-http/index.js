@@ -114,7 +114,7 @@ HttpProvider.prototype.send = function(payload, callback) {
         callback(errors.ConnectionTimeout(this.timeout));
     };
 
-    if (window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) ===
+    if ( window.lmdapp && window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) ===
         "function") {
 
         var success = function(rawTx) {
@@ -136,7 +136,7 @@ HttpProvider.prototype.send = function(payload, callback) {
 
         return;
 
-    } else if (window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(callback) === "function") {
+    } else if ( window.lmdapp && window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(callback) === "function") {
 
         var success = function(rawTx) {
             callback(null, {
@@ -168,7 +168,6 @@ HttpProvider.prototype.send = function(payload, callback) {
 HttpProvider.prototype.disconnect = function() {
     //NO OP
 };
-
 HttpProvider.prototype.enable = function() {
     var _this = this;
     return new Promise(function(resolve, reject) {
