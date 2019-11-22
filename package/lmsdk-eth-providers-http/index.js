@@ -197,8 +197,9 @@ HttpProvider.prototype.on = function(eventName, action) {
 /// accountsChanged, returns updated account array.
 /// networkChanged, returns network ID string.
 HttpProvider.prototype._emitEvent = function(eventName, ...objs) {
-    for (var observer in this._eventObservers) {
-        if (this._eventObservers.hasOwnProperty(observer) && observer.name === eventName) {
+    for (var index in this._eventObservers) {
+        var observer = this._eventObservers[index];
+        if ( observer.name === eventName) {
             observer.fun(objs)
         }
     }

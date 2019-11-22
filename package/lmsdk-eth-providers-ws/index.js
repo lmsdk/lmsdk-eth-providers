@@ -42,8 +42,7 @@ if (isNode) {
         parseURL = function(url) {
             return new newURL(url);
         };
-    }
-    else {
+    } else {
         // Web3 supports Node.js 5, so fall back to the legacy URL API if necessary
         parseURL = require('url').parse;
     }
@@ -58,7 +57,7 @@ if (isNode) {
 
 
 
-var WebsocketProvider = function WebsocketProvider(url, options)  {
+var WebsocketProvider = function WebsocketProvider(url, options) {
     if (!Ws) {
         throw new Error('websocket is not available');
     }
@@ -82,7 +81,7 @@ var WebsocketProvider = function WebsocketProvider(url, options)  {
 
     // Allow a custom client configuration
     var clientConfig = options.clientConfig || undefined;
-    
+
     // Allow a custom request options
     // https://github.com/theturtle32/WebSocket-Node/blob/master/docs/WebSocketClient.md#connectrequesturl-requestedprotocols-origin-headers-requestoptions
     var requestOptions = options.requestOptions || undefined;
@@ -102,14 +101,14 @@ var WebsocketProvider = function WebsocketProvider(url, options)  {
         /*jshint maxcomplexity: 6 */
         var data = (typeof e.data === 'string') ? e.data : '';
 
-        _this._parseResponse(data).forEach(function(result){
+        _this._parseResponse(data).forEach(function(result) {
 
             var id = null;
 
             // get the id which matches the returned id
-            if(_.isArray(result)) {
-                result.forEach(function(load){
-                    if(_this.responseCallbacks[load.id])
+            if (_.isArray(result)) {
+                result.forEach(function(load) {
+                    if (_this.responseCallbacks[load.id])
                         id = load.id;
                 });
             } else {
@@ -117,14 +116,14 @@ var WebsocketProvider = function WebsocketProvider(url, options)  {
             }
 
             // notification
-            if(!id && result && result.method && result.method.indexOf('_subscription') !== -1) {
-                _this.notificationCallbacks.forEach(function(callback){
-                    if(_.isFunction(callback))
+            if (!id && result && result.method && result.method.indexOf('_subscription') !== -1) {
+                _this.notificationCallbacks.forEach(function(callback) {
+                    if (_.isFunction(callback))
                         callback(result);
                 });
 
                 // fire the callback
-            } else if(_this.responseCallbacks[id]) {
+            } else if (_this.responseCallbacks[id]) {
                 _this.responseCallbacks[id](null, result);
                 delete _this.responseCallbacks[id];
             }
@@ -133,11 +132,11 @@ var WebsocketProvider = function WebsocketProvider(url, options)  {
 
     // make property `connected` which will return the current connection status
     Object.defineProperty(this, 'connected', {
-      get: function () {
-        return this.connection && this.connection.readyState === this.connection.OPEN;
-      },
-      enumerable: true,
-  });
+        get: function() {
+            return this.connection && this.connection.readyState === this.connection.OPEN;
+        },
+        enumerable: true,
+    });
 };
 
 /**
@@ -145,14 +144,14 @@ var WebsocketProvider = function WebsocketProvider(url, options)  {
 
  @method addDefaultEvents
  */
-WebsocketProvider.prototype.addDefaultEvents = function(){
+WebsocketProvider.prototype.addDefaultEvents = function() {
     var _this = this;
 
-    this.connection.onerror = function(){
+    this.connection.onerror = function() {
         _this._timeout();
     };
 
-    this.connection.onclose = function(){
+    this.connection.onclose = function() {
         _this._timeout();
 
         // reset all requests and callbacks
@@ -176,16 +175,16 @@ WebsocketProvider.prototype._parseResponse = function(data) {
 
     // DE-CHUNKER
     var dechunkedData = data
-        .replace(/\}[\n\r]?\{/g,'}|--|{') // }{
-        .replace(/\}\][\n\r]?\[\{/g,'}]|--|[{') // }][{
-        .replace(/\}[\n\r]?\[\{/g,'}|--|[{') // }[{
-        .replace(/\}\][\n\r]?\{/g,'}]|--|{') // }]{
+        .replace(/\}[\n\r]?\{/g, '}|--|{') // }{
+        .replace(/\}\][\n\r]?\[\{/g, '}]|--|[{') // }][{
+        .replace(/\}[\n\r]?\[\{/g, '}|--|[{') // }[{
+        .replace(/\}\][\n\r]?\{/g, '}]|--|{') // }]{
         .split('|--|');
 
-    dechunkedData.forEach(function(data){
+    dechunkedData.forEach(function(data) {
 
         // prepend the last chunk
-        if(_this.lastChunk)
+        if (_this.lastChunk)
             data = _this.lastChunk + data;
 
         var result = null;
@@ -193,13 +192,13 @@ WebsocketProvider.prototype._parseResponse = function(data) {
         try {
             result = JSON.parse(data);
 
-        } catch(e) {
+        } catch (e) {
 
             _this.lastChunk = data;
 
             // start timeout to cancel all requests
             clearTimeout(_this.lastChunkTimeout);
-            _this.lastChunkTimeout = setTimeout(function(){
+            _this.lastChunkTimeout = setTimeout(function() {
                 _this._timeout();
                 throw errors.InvalidResponse(data);
             }, 1000 * 15);
@@ -211,7 +210,7 @@ WebsocketProvider.prototype._parseResponse = function(data) {
         clearTimeout(_this.lastChunkTimeout);
         _this.lastChunk = null;
 
-        if(result)
+        if (result)
             returnValues.push(result);
     });
 
@@ -236,7 +235,7 @@ WebsocketProvider.prototype._addResponseCallback = function(payload, callback) {
 
     // schedule triggering the error response if a custom timeout is set
     if (this._customTimeout) {
-        setTimeout(function () {
+        setTimeout(function() {
             if (_this.responseCallbacks[id]) {
                 _this.responseCallbacks[id](errors.ConnectionTimeout(_this._customTimeout));
                 delete _this.responseCallbacks[id];
@@ -251,8 +250,8 @@ WebsocketProvider.prototype._addResponseCallback = function(payload, callback) {
  @method _timeout
  */
 WebsocketProvider.prototype._timeout = function() {
-    for(var key in this.responseCallbacks) {
-        if(this.responseCallbacks.hasOwnProperty(key)){
+    for (var key in this.responseCallbacks) {
+        if (this.responseCallbacks.hasOwnProperty(key)) {
             this.responseCallbacks[key](errors.InvalidConnection('on WS'));
             delete this.responseCallbacks[key];
         }
@@ -260,12 +259,12 @@ WebsocketProvider.prototype._timeout = function() {
 };
 
 
-WebsocketProvider.prototype.send = function (payload, callback) {
-    
+WebsocketProvider.prototype.send = function(payload, callback) {
+
     var _this = this;
 
     if (this.connection.readyState === this.connection.CONNECTING) {
-        setTimeout(function () {
+        setTimeout(function() {
             _this.send(payload, callback);
         }, 10);
         return;
@@ -284,10 +283,11 @@ WebsocketProvider.prototype.send = function (payload, callback) {
         callback(new Error('connection not open'));
         return;
     }
-    
-    if (window.lmdapp && window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(callback) ===
+
+    if (window.lmdapp && window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sendTransaction" && typeof(
+            callback) ===
         "function") {
-    
+
         var success = function(rawTx) {
             payload.method = "eth_sendRawTransaction";
             payload.params = [rawTx];
@@ -298,17 +298,18 @@ WebsocketProvider.prototype.send = function (payload, callback) {
                 callback(error);
             }
         }
-    
+
         var fail = function(e) {
             callback(e, r)
         }
-    
+
         plus.bridge.exec("LMETH", "eth_sendTransaction", [plus.bridge.callbackId(success, fail)], payload)
-    
+
         return;
-    
-    } else if (window.lmdapp && window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(callback) === "function") {
-    
+
+    } else if (window.lmdapp && window.lmdapp.lmt === 'ethereum' && payload.method === "eth_sign" && typeof(
+            callback) === "function") {
+
         var success = function(rawTx) {
             callback(null, {
                 id: payload.id,
@@ -316,18 +317,18 @@ WebsocketProvider.prototype.send = function (payload, callback) {
                 result: rawTx
             })
         }
-        
+
         var fail = function(e) {
             callback(e, null)
         }
-    
+
         plus.bridge.exec("LMETH", "eth_sign", [plus.bridge.callbackId(success, fail)], payload)
-    
+
         return;
-    
+
     } else
 
-    this.connection.send(JSON.stringify(payload));
+        this.connection.send(JSON.stringify(payload));
     this._addResponseCallback(payload, callback);
 };
 
@@ -338,12 +339,12 @@ WebsocketProvider.prototype.send = function (payload, callback) {
  @param {String} type    'notifcation', 'connect', 'error', 'end' or 'data'
  @param {Function} callback   the callback to call
  */
-WebsocketProvider.prototype.on = function (type, callback) {
+WebsocketProvider.prototype.on = function(type, callback) {
 
-    if(typeof callback !== 'function')
+    if (typeof callback !== 'function')
         throw new Error('The second parameter callback must be a function.');
 
-    switch(type){
+    switch (type) {
         case 'data':
             this.notificationCallbacks.push(callback);
             break;
@@ -360,9 +361,19 @@ WebsocketProvider.prototype.on = function (type, callback) {
             this.connection.onerror = callback;
             break;
 
-        // default:
-        //     this.connection.on(type, callback);
-        //     break;
+        case 'accountsChanged':
+            this._eventObservers.push({
+                name: type,
+                fun: callback
+            })
+            break;
+
+        case 'networkChanged':
+            this._eventObservers.push({
+                name: type,
+                fun: callback
+            })
+            break;
     }
 };
 
@@ -375,22 +386,22 @@ WebsocketProvider.prototype.on = function (type, callback) {
  @param {String} type    'notifcation', 'connect', 'error', 'end' or 'data'
  @param {Function} callback   the callback to call
  */
-WebsocketProvider.prototype.removeListener = function (type, callback) {
+WebsocketProvider.prototype.removeListener = function(type, callback) {
     var _this = this;
 
-    switch(type){
+    switch (type) {
         case 'data':
-            this.notificationCallbacks.forEach(function(cb, index){
-                if(cb === callback)
+            this.notificationCallbacks.forEach(function(cb, index) {
+                if (cb === callback)
                     _this.notificationCallbacks.splice(index, 1);
             });
             break;
 
-        // TODO remvoving connect missing
+            // TODO remvoving connect missing
 
-        // default:
-        //     this.connection.removeListener(type, callback);
-        //     break;
+            // default:
+            //     this.connection.removeListener(type, callback);
+            //     break;
     }
 };
 
@@ -400,13 +411,13 @@ WebsocketProvider.prototype.removeListener = function (type, callback) {
  @method removeAllListeners
  @param {String} type    'notifcation', 'connect', 'error', 'end' or 'data'
  */
-WebsocketProvider.prototype.removeAllListeners = function (type) {
-    switch(type){
+WebsocketProvider.prototype.removeAllListeners = function(type) {
+    switch (type) {
         case 'data':
             this.notificationCallbacks = [];
             break;
 
-        // TODO remvoving connect properly missing
+            // TODO remvoving connect properly missing
 
         case 'connect':
             this.connection.onopen = null;
@@ -421,7 +432,7 @@ WebsocketProvider.prototype.removeAllListeners = function (type) {
             break;
 
         default:
-            // this.connection.removeAllListeners(type);
+
             break;
     }
 };
@@ -431,7 +442,7 @@ WebsocketProvider.prototype.removeAllListeners = function (type) {
 
  @method reset
  */
-WebsocketProvider.prototype.reset = function () {
+WebsocketProvider.prototype.reset = function() {
     this._timeout();
     this.notificationCallbacks = [];
 
@@ -442,7 +453,7 @@ WebsocketProvider.prototype.reset = function () {
     this.addDefaultEvents();
 };
 
-WebsocketProvider.prototype.disconnect = function () {
+WebsocketProvider.prototype.disconnect = function() {
     if (this.connection) {
         this.connection.close();
     }
@@ -464,8 +475,26 @@ WebsocketProvider.prototype.enable = function() {
         }
     })
 }
+
 WebsocketProvider.prototype.isMetaMask = true;
 WebsocketProvider.prototype.isLimoWallet = true;
 WebsocketProvider.prototype.autoRefreshOnNetworkChange = true;
+WebsocketProvider.prototype._eventObservers = [];
+/// accountsChanged, returns updated account array.
+/// networkChanged, returns network ID string.
+WebsocketProvider.prototype._emitEvent = function(eventName, ...objs) {
+    for (var index in this._eventObservers) {
+        var observer = this._eventObservers[index];
+        if ( observer.name === eventName) {
+            observer.fun(objs)
+        }
+    }
+}
+
+WebsocketProvider.prototype.on("networkChanged", function(netid) {
+    if (this.autoRefreshOnNetworkChange === true) {
+        window.location.reload()
+    }
+})
 
 module.exports = WebsocketProvider;
