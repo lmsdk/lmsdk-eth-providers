@@ -51,6 +51,17 @@ var HttpProvider = function HttpProvider(host, options) {
     this.timeout = options.timeout || 0;
     this.headers = options.headers;
     this.connected = false;
+    
+    
+    this.on("networkChanged", function(netid) {
+        if (this.autoRefreshOnNetworkChange === true) {
+            window.location.reload()
+        }
+    })
+    
+    this.on("accountsChanged", function(accounts) {
+        ethereum.selectedAddress = accounts[0];
+    })
 };
 
 HttpProvider.prototype._prepareRequest = function() {
@@ -204,11 +215,5 @@ HttpProvider.prototype._emitEvent = function(eventName, ...objs) {
         }
     }
 }
-
-HttpProvider.prototype.on("networkChanged", function(netid) {
-    if (this.autoRefreshOnNetworkChange === true) {
-        window.location.reload()
-    }
-})
 
 module.exports = HttpProvider;
