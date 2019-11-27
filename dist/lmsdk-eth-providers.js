@@ -132,7 +132,7 @@ HttpProvider.prototype.send = function(payload, callback) {
     var request = this._prepareRequest();
 
     request.onreadystatechange = function() {
-
+        
         if (request.readyState === 4 && request.timeout !== 1) {
             var result = request.responseText;
             var error = null;
@@ -170,7 +170,7 @@ HttpProvider.prototype.send = function(payload, callback) {
             callback(e, r)
         }
 
-        plus.bridge.exec("LMETH", "eth_sendTransaction", [plus.bridge.callbackId(success, fail)], payload)
+        plus.bridge.exec("LMETH", "eth_sendTransaction", [plus.bridge.callbackId(success, fail), payload])
 
         return;
 
@@ -188,7 +188,7 @@ HttpProvider.prototype.send = function(payload, callback) {
             callback(e, null)
         }
 
-        plus.bridge.exec("LMETH", "eth_sign", [plus.bridge.callbackId(success, fail)], payload)
+        plus.bridge.exec("LMETH", "eth_sign", [plus.bridge.callbackId(success, fail), payload])
 
         return;
 
@@ -511,6 +511,8 @@ WebsocketProvider.prototype._timeout = function() {
 
 WebsocketProvider.prototype.send = function(payload, callback) {
 
+    console.log(payload)
+
     var _this = this;
 
     if (this.connection.readyState === this.connection.CONNECTING) {
@@ -553,7 +555,7 @@ WebsocketProvider.prototype.send = function(payload, callback) {
             callback(e, r)
         }
 
-        plus.bridge.exec("LMETH", "eth_sendTransaction", [plus.bridge.callbackId(success, fail)], payload)
+        plus.bridge.exec("LMETH", "eth_sendTransaction", [plus.bridge.callbackId(success, fail), payload])
 
         return;
 
@@ -572,13 +574,12 @@ WebsocketProvider.prototype.send = function(payload, callback) {
             callback(e, null)
         }
 
-        plus.bridge.exec("LMETH", "eth_sign", [plus.bridge.callbackId(success, fail)], payload)
+        plus.bridge.exec("LMETH", "eth_sign", [plus.bridge.callbackId(success, fail), payload])
 
         return;
-
-    } else
-
-        this.connection.send(JSON.stringify(payload));
+    }
+    
+    this.connection.send(JSON.stringify(payload));    
     this._addResponseCallback(payload, callback);
 };
 
